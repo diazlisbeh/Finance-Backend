@@ -11,18 +11,21 @@ namespace Backend.DSL.Controller;
 [ApiController]
 [Route("[controller]")]
 [EnableCors("WebPolicy")]
-public class CategoryController : ControllerBase{
+public class CategoryController : ControllerBase
+{
 
-    private ICategoryService _service; 
+    private ICategoryService _service;
 
-    public CategoryController(ICategoryService service){
+    public CategoryController(ICategoryService service)
+    {
         _service = service;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(){
+    public async Task<ActionResult<List<Category>>> Get()
+    {
         // var categories = await _service.Get();
-        return Ok(await _service.Get());
+        return await _service.Get();
     }
 
 }

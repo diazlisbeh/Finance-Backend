@@ -1,0 +1,36 @@
+use("FinanceApp")
+
+db.Categories.insertMany(
+    [
+  {
+    value: 1,
+    name: "Principal",
+    description: "Capital and Principal Budget"
+  },
+  {
+    value: 2,
+    name: "Obligations",
+    description: "Spends of Obligations"
+  },
+  {
+    value: 3,
+    name: "Transport",
+    description: "Spends of Transport"
+  },
+  {
+    value: 4,
+    name: "Educations",
+    description: "Incomes or Spens of Education"
+  },
+  {
+    value: 5,
+    name: "Saving",
+    description: "Savings"
+  },
+  {
+    value: 6,
+    name: "Others",
+    description: "Others spends or incomes"
+  },
+]
+)

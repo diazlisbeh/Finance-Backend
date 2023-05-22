@@ -3,7 +3,8 @@ using Backend.DAL.Models;
 
 namespace Backend.DAL.Interface;
 
-public interface ICategoryService{
+public interface ICategoryService
+{
 
-    public Task<IEnumerable<Category>> Get();
+    public Task<List<Category>> Get();
 }

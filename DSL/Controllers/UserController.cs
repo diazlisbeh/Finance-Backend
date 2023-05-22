@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Cors;
 
 
 namespace Backend.DSL.Controller
-{ 
+{
     [EnableCors("WebPolicy")]
     [ApiController]
     [Route("[controller]")]
@@ -23,56 +23,67 @@ namespace Backend.DSL.Controller
         private IUserService _service;
         private IConfiguration _config;
 
-        public UserController(IUserService service, IConfiguration config){
+        public UserController(IUserService service, IConfiguration config)
+        {
             _service = service;
             _config = config;
         }
 
         [HttpPost("register")]
         [EnableCors]
-        public async Task<IActionResult> Register(UserRegisterDto userDto){
-            
+        public async Task<IActionResult> Register(UserRegisterDto userDto)
+        {
+
             var user = await _service.Register(userDto);
-            if(user is null) return StatusCode(409); //duplicate record
+            if (user is null) return StatusCode(409); //duplicate record
             return StatusCode(201);
         }
 
         [HttpGet]
         // [EnableCors]
-        public IActionResult GetAll (){
-            return Ok(_service.GetUsers());
-            
+        public async Task<ActionResult<List<User>>> GetAll()
+        {
+            var users = await _service.GetUsers();
+            if (users is null)
+            {
+                return NotFound();
+            }
+            return users;
+
         }
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAsync([FromRoute] int  id)
+        public async Task<IActionResult> GetAsync([FromRoute] string id)
         {
             var user = await _service.GetUser(id);
-            return  Ok(user);
+            return Ok(user);
         }
 
         [HttpPost("login")]
-        
-        public async Task<IActionResult> Login (UserLoginDto userLogin){
-            var userRepo = await _service.Login(userLogin.email,userLogin.password);
-            if(userRepo is null)return Unauthorized();
 
-            var Claims = new []{
+        public async Task<IActionResult> Login(UserLoginDto userLogin)
+        {
+            var userRepo = await _service.Login(userLogin.email, userLogin.password);
+            if (userRepo is null) return Unauthorized();
+
+            var Claims = new[]{
                 new Claim(ClaimTypes.NameIdentifier,userRepo.Id.ToString()),
                 new Claim(ClaimTypes.Email,userRepo.Email)
-            }; 
+            };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
             var Card = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
-            var TokenDescription = new SecurityTokenDescriptor{
+            var TokenDescription = new SecurityTokenDescriptor
+            {
                 Subject = new ClaimsIdentity(Claims),
                 Expires = DateTime.Now.AddDays(7),
                 SigningCredentials = Card,
-                
+
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(TokenDescription);
-            return Ok(new{
+            return Ok(new
+            {
                 token = tokenHandler.WriteToken(token),
                 userRepo.Name,
                 userRepo.Capital,
@@ -85,9 +96,9 @@ namespace Backend.DSL.Controller
 
             });
 
-            
-            
-            
+
+
+
         }
 
     }

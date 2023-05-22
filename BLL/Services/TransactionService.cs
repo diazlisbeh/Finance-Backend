@@ -4,52 +4,64 @@ using Backend.BLL.Context;
 using System.Collections;
 using Backend.DAL.DTOs;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using Microsoft.Extensions.Options;
+// using Microsoft.EntityFrameworkCore;
 
 namespace Backend.BLL.Services;
 
 public class TransactionService : ITransactionService
 {
-    private FinanceContext _context;
-    private IMapper _mapper;
-    public TransactionService (FinanceContext context, IMapper mapper){
-        _context = context;
-        _mapper = mapper;
-    }
-    public List<Transaction> GetAll(int Id)
+    private IMongoCollection<User> _collection;
+
+    public TransactionService(IOptions<Settings> settings)
     {
-         
-        return  _context.Transactions.Where(p => p.UserID == Id).ToList();
+        var client = new MongoClient(settings.Value.ConnectionStrings);
+        var database = client.GetDatabase(settings.Value.DatabaseName);
+        _collection = database.GetCollection<User>("users");
+
+    }
+    public async Task<List<Transaction>> GetAll(string userId)
+    {
+        var t = await _collection.Find(x => x.Id == userId).FirstOrDefaultAsync();
+        return t.Transactions.ToList();
+
     }
 
-    public Transaction GetTransaction(Guid id)
+    public async Task<Transaction> GetTransaction(Guid id, string userId)
     {
-        return _context.Transactions.FirstOrDefault(p => p.TransactionID == id);
+        var user = await _collection.Find(x => x.Id == userId).FirstOrDefaultAsync();
+        if (user is null) return null;
+
+        var transaction = user.Transactions.Where(x => x.TransactionID == id).FirstOrDefault();
+        if (transaction is null) return null;
+
+        return transaction;
     }
 
-    public async Task<TransactionDto> Create(TransactionDto transactionDto){
-        var transaction = new Transaction(){
+    public async Task<TransactionDto> Create(TransactionDto transactionDto, string userId)
+    {
+        var transaction = new Transaction()
+        {
             TransactionID = transactionDto.TransactionID,
             Amount = transactionDto.Amount,
             CategoryID = transactionDto.CategoryId,
-            UserID = transactionDto.UserID,
             Date = DateTime.Parse(transactionDto.Date),
             Porpuse = transactionDto.Porpuse,
             Type = transactionDto.Type
         };
-        var user = await _context.users.SingleOrDefaultAsync(u => u.Id == transactionDto.UserID); 
-        
-        if(transactionDto.Type ==0){
-            user.Capital = user.Capital + (decimal)transactionDto.Amount;
+        var user = await _collection.Find(x => x.Id == userId).FirstOrDefaultAsync();
 
-        }else{
-            user.Capital = user.Capital - (decimal)transactionDto.Amount;
-
+        if (transactionDto.Type == 0)
+        {
+            _collection.UpdateOne(u => u.Id == userId, Builders<User>.Update.Inc(x => ((int)x.Capital), ((int)transactionDto.Amount)));
         }
-        _context.Update(user);
-        await _context.Transactions.AddAsync(transaction);
-        
-        await _context.SaveChangesAsync();
+        else
+        {
+            _collection.UpdateOne(u => u.Id == userId, Builders<User>.Update.Inc(x => x.Capital, ((int)(transactionDto.Amount - transactionDto.Amount * 2))));
+        }
+
+        _collection.UpdateOne(u => u.Id == userId, Builders<User>.Update.Push(u => u.Transactions, transaction));
         return transactionDto;
 
     }

@@ -11,41 +11,51 @@ namespace Backend.DSL.Controller;
 [ApiController]
 [Route("[controller]")]
 [EnableCors("WebPolicy")]
-public class TransactionController : ControllerBase{
+public class TransactionController : ControllerBase
+{
 
-    private ITransactionService _service; 
+    private ITransactionService _service;
 
-    public TransactionController(ITransactionService service){
+    public TransactionController(ITransactionService service)
+    {
         _service = service;
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetAll([FromRoute] int id){
+    public async Task<ActionResult<List<Transaction>>> GetAll([FromRoute] string id)
+    {
 
-        var transactions = _service.GetAll(id);
+        var transactions = await _service.GetAll(id);
 
-        if(transactions is null ){
+        if (transactions is null)
+        {
             return NoContent();
-        }else {
-            
-            return Ok(transactions);
+        }
+        else
+        {
+
+            return transactions;
         };
 
     }
 
     [HttpGet]
-    public IActionResult Get( Guid id){
-        var transaction = _service.GetTransaction(id);
+    public async Task<ActionResult<Transaction>> Get(Guid id, string userId)
+    {
+        var transaction = await _service.GetTransaction(id, userId);
 
-        if(transaction is null ){
+        if (transaction is null)
+        {
             return NotFound();
-        }else return Ok(transaction);
+        }
+        else return transaction;
     }
 
     [HttpPost("create")]
-    public async Task<IActionResult> Create(TransactionDto transaction){
-         
-        return Ok( await _service.Create(transaction)); 
+    public async Task<ActionResult> Create(TransactionDto transaction, string userId)
+    {
+
+        return Ok(await _service.Create(transaction, userId));
     }
 
 }

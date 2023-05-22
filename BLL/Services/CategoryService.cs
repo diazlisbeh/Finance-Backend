@@ -3,17 +3,27 @@ using Backend.BLL.Context;
 using Backend.DAL.Interface;
 using Backend.DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 public class CategoryService : ICategoryService
 {
-    private FinanceContext _context;
+    private IMongoCollection<Category> _collection;
 
-    public CategoryService(FinanceContext context){
-        _context = context;
+    public CategoryService(IOptions<Settings> setting)
+    {
+        var client = new MongoClient(setting.Value.ConnectionStrings);
+        var database = client.GetDatabase(setting.Value.DatabaseName);
+        _collection = database.GetCollection<Category>("Categories");
     }
 
-    public async Task<IEnumerable<Category>> Get()
+    // public async Task<IEnumerable<Category>> Get()
+    // {
+    // return await _context.Categories.ToListAsync();
+    // }
+
+    public async Task<List<Category>> Get()
     {
-        return await _context.Categories.ToListAsync();
+        return await _collection.Find(_ => true).ToListAsync();
     }
 }

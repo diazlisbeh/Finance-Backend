@@ -5,10 +5,11 @@ using Backend.DAL.Models;
 
 namespace Backend.DAL.Interface;
 
-public interface ITransactionService{
+public interface ITransactionService
+{
 
-    Transaction GetTransaction(Guid id);
-    public List<Transaction> GetAll(int Id);
+    Task<Transaction> GetTransaction(Guid id, string userId);
+    Task<List<Transaction>> GetAll(string userId);
 
-    Task<TransactionDto> Create(TransactionDto transaction);
+    Task<TransactionDto> Create(TransactionDto transaction, string userId);
 }

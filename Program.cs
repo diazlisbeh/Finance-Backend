@@ -1,25 +1,26 @@
 using Backend.DSL.Filter;
-using Backend.DAL.Models;
 using Backend.DAL.Interface;
 using Backend.BLL.Services;
 using Backend.BLL.Context;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
+// using Microsoft.EntityFrameworkCore;
+// using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
+// using Npgsql.EntityFrameworkCore.PostgreSQL;
+using Microsoft.EntityFrameworkCore;
+using Backend.DAL.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("local");
 var policy = "WebPolicy";
-//Dependy Injection to Database
 
 
-builder.Services.AddDbContext<FinanceContext>(options =>
-{
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-});
+//Depency Injection to Database
+builder.Services.Configure<Settings>(
+    builder.Configuration.GetSection("Database")
+);
+
 
 //Auto Mapper
 builder.Services.AddAutoMapper(typeof(Program));
