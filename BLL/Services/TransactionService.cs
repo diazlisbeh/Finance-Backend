@@ -52,14 +52,14 @@ public class TransactionService : ITransactionService
         };
         var user = await _collection.Find(x => x.Id == userId).FirstOrDefaultAsync();
 
-        if (transactionDto.Type == 0)
-        {
-            _collection.UpdateOne(u => u.Id == userId, Builders<User>.Update.Inc(x => ((int)x.Capital), ((int)transactionDto.Amount)));
-        }
-        else
-        {
-            _collection.UpdateOne(u => u.Id == userId, Builders<User>.Update.Inc(x => x.Capital, ((int)(transactionDto.Amount - transactionDto.Amount * 2))));
-        }
+        // if (transactionDto.Type == 0)
+        // {
+        // _collection.UpdateOne(u => u.Id == userId, Builders<User>.Update.Inc(x => ((int)x.Capital), ((int)transactionDto.Amount)));
+        // }
+        // else
+        // {
+        // _collection.UpdateOne(u => u.Id == userId, Builders<User>.Update.Inc(x => x.Capital, ((int)(transactionDto.Amount - transactionDto.Amount * 2))));
+        // }
 
         _collection.UpdateOne(u => u.Id == userId, Builders<User>.Update.Push(u => u.Transactions, transaction));
         return transactionDto;
