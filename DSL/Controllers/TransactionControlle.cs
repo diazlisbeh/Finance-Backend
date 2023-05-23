@@ -51,11 +51,11 @@ public class TransactionController : ControllerBase
         else return transaction;
     }
 
-    [HttpPost("create")]
-    public async Task<ActionResult> Create(TransactionDto transaction, string userId)
+    [HttpPost("create/{id}")]
+    public async Task<ActionResult> Create(TransactionDto transaction, string id)
     {
 
-        return Ok(await _service.Create(transaction, userId));
+        return Ok(await _service.Create(transaction, id));
     }
 
 }
