@@ -9,6 +9,7 @@ public class TransactionDto
     public Guid TransactionID { get; set; }
     public int Amount { get; set; }
     public CategoriesEnum CategoryId { get; set; }
+    public string? CategoryName { get; set; }
     // public int UserID{ get; set; }
     public string Date { get; set; }
     public string? Porpuse { get; set; }

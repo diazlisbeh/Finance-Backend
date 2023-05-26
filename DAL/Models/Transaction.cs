@@ -6,6 +6,7 @@ public class Transaction
     public Guid TransactionID { get; set; }
     public float Amount { get; set; }
     public CategoriesEnum CategoryID { get; set; }
+    public string? CategoryName { get; set; }
     public DateTime Date { get; set; }
     public string? Porpuse { get; set; }
     public TransactionType Type { get; set; }
